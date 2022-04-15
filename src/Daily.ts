@@ -51,6 +51,35 @@ function elaborateFiles(files) : File[] {
 }
 
 /**
+ * Generate Markdown Report for file details
+ * @param {number} day
+ * @param {File[]} files
+ */
+function generateMarkdownFileReport(day, files) {
+  const filename = `./reports/Daily/${day}/FileReport.md`;
+
+  let content = `# ${process.env.TOPIC} - 100 Days of Code: Day ${day} File Report`;
+
+  files.forEach((file: File) => {
+    content += `\n\n---\n### - Filename: ${file.filename}
+#### Status: _${file.status}_\n
+_Additions_: \`${file.additions}\`
+_Deletions_: \`${file.deletions}\`
+_Changes_: \`${file.changes}\`\n\n`;
+
+    if (file.status === 'renamed') {
+      content += `__Previous Filename__: \`${file.previous_filename}\``;
+    } else {
+      content += `\`\`\`diff
+${file.patch}
+\`\`\``;
+    }
+  });
+
+  fs.writeFileSync(filename, content);
+}
+
+/**
  * Generate Markdown Report
  * @param {number} day
  * @param {string} startDate
@@ -73,7 +102,7 @@ _Removed Rows_: \`${info.stats[2]}\`
 _Total changed Rows_: \`${info.stats[0]}\`\n
 ## Description\n
 === DESCRIPTION ===\n
-> Files details found in FileReports.md`;
+> Files details found in FileReport.md`;
 
   fs.writeFileSync(filename, content);
 }
@@ -94,6 +123,7 @@ function generateDailyReport(info) : void {
   fs.mkdirSync('./reports/Daily/' + challengeInfo.day);
 
   generateMarkdownReport(challengeInfo.day, challengeInfo.start_date, info);
+  generateMarkdownFileReport(challengeInfo.day, info.files);
 }
 
 
